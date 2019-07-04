@@ -1,0 +1,78 @@
+<script type="text/javascript">
+    RED.nodes.registerType('Wagon',{
+        category: 'Train Modelling Nodes',
+        color: '#a6bbcf',
+        defaults: {
+            name: {value:"",require:true},
+            description: {value:"",require:true},
+            stationProfile1: {value:"",require:true},
+            stationProfile2: {value:"",require:true},
+            stationProfile3: {value:"",require:true},
+        },
+        inputs:1,
+        outputs:1,
+        icon: "../icons/wagon.png",
+        label: function() {
+            return "Wagon";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="Wagon">
+    <div class="form-row">
+
+<fieldset>
+    <legend>Wagon - Core</legend>
+
+        <label for="node-input-name"><i class="icon-tag"></i>Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+        <br/><br/>
+        <label for="node-input-description"><i class="icon-tag"></i>Description: </label>
+        <input ttype="textarea" rows="6" cols="9" id="node-input-description" placeholder="Description">
+        <br/><br/>
+
+
+        <br/><br/>
+        <div class="form-row">
+            <label for="node-input-stationProfile1"><i class="icon-tag"></i>Select one Station: </label>
+            <select type="text" id="node-input-stationProfile1">
+                <option value="Cancer">Domain: Cancer</option>
+                <option value="Hepatitis">Domain: Hepatitis</option>
+                <option value="Obesity">Domain: Obesity</option>
+                <option value="Diabetes">Domain: Diabetes</option>
+            </select>
+        </div>
+        <br/><br/>
+        <div class="form-row">
+            <label for="node-input-stationProfile2"><i class="icon-tag"></i>Select one Station: </label>
+            <select type="text" id="node-input-stationProfile2">
+                <option value="Cancer">Domain: Cancer</option>
+                <option value="Hepatitis">Domain: Hepatitis</option>
+                <option value="Obesity">Domain: Obesity</option>
+                <option value="Diabetes">Domain: Diabetes</option>
+            </select>
+        </div>
+        <br/><br/>
+        <div class="form-row">
+            <label for="node-input-stationProfile3"><i class="icon-tag"></i>Select one Station: </label>
+            <select type="text" id="node-input-stationProfile3">
+                <option value="Cancer">Domain: Cancer</option>
+                <option value="Hepatitis">Domain: Hepatitis</option>
+                <option value="Obesity">Domain: Obesity</option>
+                <option value="Diabetes">Domain: Diabetes</option>
+            </select>
+        </div>
+
+
+    </div>
+</fieldset>
+
+</script>
+
+<script type="text/x-red" data-help-name="Wagon">
+    <p>PHT Train Metadata is defined for a common agreement and integration between different PHT implementations.
+
+Train metadata includes the attributes to define overall Analytic task/workflow to be executed. Its component; Wagon is used as a term to define the atomic algorithm that is a subcomponent of the workflow, to run independently on a specific station. Wagon metadata contains attributes about required station profile and resources. Resources metadata attributes defines target runtime environment and all the constituent physical files of analytic task such as docker image file, python code file, cql query file .
+
+In our PHT Implementation Train is implemented as a Json document and registered as a Digital Object on DataCite.  A custom Train Repository with required REST-Services is designed and being implemented.</p>
+</script>

@@ -1,0 +1,80 @@
+<script type="text/x-red" data-template-name="Artifact">
+    <div class="form-row">
+<fieldset>
+    <legend>Artifact - Core</legend>
+
+        <label><i class="fa fa-file-text-o"></i> File</label>
+        <span>
+            <label class="editor-button" for="node-input-file"><i class="fa fa-upload"></i> Upload</label>
+            <input class="hide" type="file" id="node-input-file">
+            <span id="name"></span>
+            <span id="node-input-filename" style="width: calc(100% - 280px); display: inline-block;"> </span>
+            <button class="editor-button editor-button-small" id="node-red-input-filename-clear" style="margin-left: 10px"><i class="fa fa-times"></i></button>
+        </span>
+        <input type="hidden" id="node-input-filedata">
+        <!-- <input class="hide node-input-path" type="text" id="node-input-file"> -->
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-format"><i class="fa fa-sign-out"></i> Output</span></label>
+        <select id="node-input-format">
+            <option value="utf8">String</option>
+            <option value="">Buffer</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</fieldset>
+</script>
+
+<script type="text/x-red" data-help-name="Artifact">
+    <p>PHT Train Metadata is defined for a common agreement and integration between different PHT implementations.
+
+Train metadata includes the attributes to define overall Analytic task/workflow to be executed. Its component; Wagon is used as a term to define the atomic algorithm that is a subcomponent of the workflow, to run independently on a specific station. Wagon metadata contains attributes about required station profile and resources. Resources metadata attributes defines target runtime environment and all the constituent physical files of analytic task such as docker image file, python code file, cql query file .
+
+In our PHT Implementation Train is implemented as a Json document and registered as a Digital Object on DataCite.  A custom Train Repository with required REST-Services is designed and being implemented.</p>
+</script>
+
+
+<script type="text/javascript">
+    RED.nodes.registerType('Artifact', {
+        category: 'Train Modelling Nodes',
+        color: '#a6bbcf',
+        defaults: {
+            name: { value: "" },
+            filename: { value: "" },
+            filedata: { value: "" },
+            format: { value: "utf8" },
+            numberOfArtifactsformat: { value: "" },
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "file-in.png",
+        label: function () {
+            return this.name || "Artifact";
+        },
+        oneditprepare: function () {
+            $("#node-input-file").change(function () {
+                var filename = this.files[0].name;
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    $("#node-input-filename").text(filename);
+                    $("#node-input-filedata").val(event.target.result);
+                }
+                if (this.files[0].size > 100 * 1024) {
+                    alert('The embedded file size shold be less than 100KB.');
+                } else {
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            $("#node-red-input-filename-clear").click(function() {
+                $("#node-input-filename").text("");
+                $("#node-input-filedata").val("");
+            });
+        }
+    });
+</script>

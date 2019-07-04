@@ -1,0 +1,555 @@
+
+
+<script type="text/javascript">
+
+
+    RED.nodes.registerType('Train',{
+        category: 'Train Modelling Nodes',
+        color: '#a6bbcf',
+        defaults: {
+            <!-- Train Core. -->
+            name: {value:"",require:true},
+            description: {value:"",require:true},
+            sourceRepository: {value:"",require:true},
+            userToken: {value:"",require:true},
+            internalId: {value:"",require:true},
+            internalVersion: {value:"",require:true},
+            internalPointer: {value:"",require:true},
+
+            <!-- Train DataCite Core -->
+            language: {value:"",require:true},
+            version: {value:"",require:true},
+            publicationYear: {value:"",require:true},
+            publisher: {value:"",require:true},
+            <!-- Train DataCite - Identifier -->
+            identifierType: {value:"",require:true},
+            identifierContent: {value:"",require:true},
+            <!-- Train DataCite - Creators -->
+            creatorAffiliation: {value:"",require:true},
+            creatorGivenName: {value:"",require:true},
+            creatorFamilyName: {value:"",require:true},
+            nameType: {value:"",require:true},
+            creatorContent: {value:"",require:true},
+            creatorNameIdentifierScheme: {value:"",require:true},
+            creatorSchemeURI: {value:"",require:true},
+            nameIdentifierContent: {value:"",require:true},
+            <!-- Train DataCite - Subjects -->
+            subjectSchemeURI: {value:"",require:true},
+            subjectContent: {value:"",require:true},
+            subjectScheme: {value:"",require:true},
+            <!-- Train DataCite - Dates -->
+            dateType: {value:"",require:true},
+            dateInformation: {value:"",require:true},
+            dateContent: {value:"",require:true},
+            <!-- Train DataCite - Formats -->
+            format: {value:"",require:true},
+            <!-- Train DataCite - RightsList -->
+            rightsURI: {value:"",require:true},
+            rightsContent: {value:"",require:true},
+            <!-- Train DataCite - Titles -->
+            titleContent: {value:"",require:true},
+            titleType: {value:"",require:true},
+            <!-- Train DataCite - Descriptions -->
+            descriptionType: {value:"",require:true},
+            descriptionContent: {value:"",require:true},
+            <!-- Train DataCite - Contributors -->
+            contributorAffiliation: {value:"",require:true},
+            contributorGivenName: {value:"",require:true},
+            contributorFamilyName: {value:"",require:true},
+            contributorType: {value:"",require:true},
+            contributorName: {value:"",require:true},
+            contributorNameIdentifierScheme: {value:"",require:true},
+            contributorSchemeURI: {value:"",require:true},
+            contributorContent: {value:"",require:true},
+            <!-- Train DataCite - FundingReferences -->
+            funderName: {value:"",require:true},
+            awardNumber: {value:"",require:true},
+            awardTitle: {value:"",require:true},
+            funderIdentifierType: {value:"",require:true},
+            fundingReferenceContent: {value:"",require:true},
+            <!-- Train DataCite - ResourceType -->
+            resourceTypeGeneral: {value:"",require:true},
+            resourceTypeContent: {value:"",require:true},
+        },
+        inputs:0,
+        outputs:1,
+        icon: "../icons/train.png",
+        label: function() {
+            return "Train";
+        },
+
+        button: {
+            enabled: function() {
+                return !this.changed
+            },
+            onclick: function() {
+                if (this.changed) {
+                    return RED.notify(RED._("notification.warning", {message:RED._("notification.warnings.undeployedChanges")}),"warning");
+                }
+                var payload = this.payload;
+                if ((this.payloadType === 'flow') ||
+                    (this.payloadType === 'global')) {
+                    var key = RED.utils.parseContextKey(payload);
+                    payload = this.payloadType+"."+key.key;
+                }
+                var label = this._def.label.call(this);
+                if (label.length > 30) {
+                    label = label.substring(0,50)+"...";
+                }
+                label = label.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                var node = this;
+                $.ajax({
+                    url: "inject/"+this.id,
+                    type:"POST",
+                    success: function(resp) {
+                        RED.notify(node._("inject.success",{label:label}),{type:"success",id:"inject"});
+                    },
+                    error: function(jqXHR,textStatus,errorThrown) {
+                        if (jqXHR.status == 404) {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.not-deployed")}),"error");
+                        } else if (jqXHR.status == 500) {
+                            RED.notify(node._("common.notification.error",{message:node._("inject.errors.failed")}),"error");
+                        } else if (jqXHR.status == 0) {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.no-response")}),"error");
+                        } else {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.unexpected",{status:jqXHR.status,message:textStatus})}),"error");
+                        }
+                    }
+                });
+            }
+        },
+        // oneditprepare:{
+        //
+        // },
+
+    });
+</script>
+
+
+
+<style>
+    .inject-time-row {
+        padding-left: 110px;
+    }
+    .inject-time-row select {
+        margin: 3px 0;
+    }
+    .inject-time-days label {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        vertical-align: baseline;
+        width: 100px;
+    }
+    .inject-time-days input {
+        width: auto;
+        vertical-align: baseline;
+    }
+    .inject-time-times {
+        width: 90px;
+    }
+    #inject-time-time {
+        width: 75px;
+        margin-left: 8px;
+        margin-bottom: 8px;
+    }
+    .inject-time-count {
+        width: 40px !important;
+    }
+</style>
+
+<!-- Train Core -->
+
+
+<script type="text/x-red" data-template-name="Train">
+<fieldset>
+    <legend>Train Core</legend>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i>Name: </label>
+        <input type="text" id="node-input-name" placeholder="Name">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-description"><i class="icon-tag"></i>Description: </label>
+        <input type="text" id="node-input-description" placeholder="Description">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-sourceRepository"><i class="icon-tag"></i>Source Repository: </label>
+        <input type="text" id="node-input-sourceRepository" placeholder="Source Repository">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-userToken"><i class="icon-tag"></i>User Token: </label>
+        <input type="text" id="node-input-userToken" placeholder="User Token">
+        <br/><br/>
+</fieldset>
+<fieldset>
+    <legend>Train - DataCite Core</legend>
+
+         <div class="form-row">
+            <label for="node-input-language"><i class="icon-tag"></i>Language: </label>
+            <select type="text" id="node-input-language">
+                <option value="EN_ENGLISH">EN_ENGLISH</option>
+                <option value="DE_GERMAN">DE_GERMAN</option>
+                <option value="other">OTHER</option>
+            </select>
+        </div>
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-version"><i class="icon-tag"></i>Version: </label>
+        <input type="text" id="node-input-version" placeholder="Version">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-publicationYear"><i class="icon-tag"></i>Publication Year: </label>
+        <input type="text" id="node-input-publicationYear" placeholder="Publication Year">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-publisher"><i class="icon-tag"></i>Publisher: </label>
+        <input type="text" id="node-input-publisher" placeholder="Publisher">
+        <br/><br/>
+</fieldset>
+
+<fieldset>
+    <legend>Train DataCite - Identifier</legend>
+
+         <div class="form-row">
+        <label for="node-input-identifierContent"><i class="icon-tag"></i>Identifier: </label>
+        <input type="text" id="node-input-identifierContent" placeholder="Identifier">
+        <br/><br/>
+
+         <div class="form-row">
+            <label for="node-input-identifierType"><i class="icon-tag"></i>Type: </label>
+            <select type="text" id="node-input-identifierType">
+                <option value="DOI">DOI</option>
+                <option value="ORCID">ORCID</option>
+                <option value="other">OTHER</option>
+            </select>
+        </div>
+        <br/><br/>
+
+</fieldset>
+
+
+<fieldset>
+    <legend>Train DataCite - Creators </legend>
+
+            <div class="form-row">
+        <label for="node-input-creatorContent"><i class="icon-tag"></i>Creator: </label>
+        <input type="text" id="node-input-creatorContent" placeholder="Creator">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-creatorAffiliation"><i class="icon-tag"></i>Affiliation: </label>
+        <input type="text" id="node-input-creatorAffiliation" placeholder="Affiliation">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-creatorGivenName"><i class="icon-tag"></i>Given Name: </label>
+        <input type="text" id="node-input-creatorGivenName" placeholder="Given Name">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-creatorFamilyName"><i class="icon-tag"></i>Family Name: </label>
+        <input type="text" id="node-input-creatorFamilyName" placeholder="Family Name">
+        <br/><br/>
+
+        <div class="form-row">
+            <label for="node-input-NameType"><i class="icon-tag"></i>Name Type: </label>
+            <select type="text" id="node-input-NameType">
+                <option value="ORGANIZATIONAL">ORGANIZATIONAL</option>
+                <option value="PERSONAL">PERSONAL</option>
+                <option value="OTHER">OTHER</option>
+            </select>
+        </div>
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-nameIdentifierContent"><i class="icon-tag"></i>Name Identifier: </label>
+        <input type="text" id="node-input-nameIdentifierContent" placeholder="Name Identifier">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-creatorNameIdentifierScheme"><i class="icon-tag"></i>Name Identifier Scheme: </label>
+        <input type="text" id="node-input-creatorNameIdentifierScheme" placeholder="Name Identifier Scheme">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-creatorSchemeURI"><i class="icon-tag"></i>SchemeURI: </label>
+        <input type="text" id="node-input-creatorSchemeURI" placeholder="SchemeURI">
+        <br/><br/>
+
+</fieldset>
+
+<fieldset>
+    <legend>Train DataCite - Subjects</legend>
+           <div class="form-row">
+        <label for="node-input-subjectContent"><i class="icon-tag"></i>Subject: </label>
+        <input type="text" id="node-input-subjectContent" placeholder="Subject">
+        <br/><br/>
+
+                <div class="form-row">
+        <label for="node-input-subjectScheme"><i class="icon-tag"></i>Scheme: </label>
+        <input type="text" id="node-input-subjectScheme" placeholder="Scheme">
+        <br/><br/>
+
+                <div class="form-row">
+        <label for="node-input-subjectSchemeURI"><i class="icon-tag"></i>SchemeURI: </label>
+        <input type="text" id="node-input-subjectSchemeURI" placeholder="SchemeURI">
+        <br/><br/>
+</fieldset>
+
+
+<fieldset>
+    <legend>Train DataCite - Dates</legend>
+
+                    <div class="form-row">
+        <label for="node-input-dateContent"><i class="icon-tag"></i>Date: </label>
+        <input type="text" id="node-input-dateContent" placeholder="Date">
+        <br/><br/>
+
+            <div class="form-row">
+            <label for="node-input-dateType"><i class="icon-tag"></i>Date Type: </label>
+            <select type="text" id="node-input-dateType">
+                <option value="ACCEPTED">ACCEPTED</option>
+                <option value="AVAILABLE">AVAILABLE</option>
+                <option value="COPYRIGHTED">COPYRIGHTED</option>
+                <option value="COLLECTED">COLLECTED</option>
+                <option value="CREATED">CREATED</option>
+                <option value="ISSUED">ISSUED</option>
+                <option value="SUBMITTED">SUBMITTED</option>
+                <option value="UPDATED">UPDATED</option>
+                <option value="VALID">VALID</option>
+                <option value="OTHER">OTHER</option>
+            </select>
+        </div>
+        <br/><br/>
+
+                        <div class="form-row">
+        <label for="node-input-dateInformation"><i class="icon-tag"></i>Information: </label>
+        <input type="text" id="node-input-dateInformation" placeholder="Information">
+        <br/><br/>
+
+</fieldset>
+
+<fieldset>
+    <legend>Train DataCite - Formats</legend>
+        <div class="form-row">
+        <label for="node-input-format"><i class="icon-tag"></i>Format: </label>
+        <input type="text" id="node-input-format" placeholder="Format">
+        <br/><br/>
+</fieldset>
+
+
+<fieldset>
+    <legend>Train DataCite - RightsList</legend>
+            <div class="form-row">
+        <label for="node-input-rightsContent"><i class="icon-tag"></i>Rights: </label>
+        <input type="text" id="node-input-rightsContent" placeholder="Rights">
+        <br/><br/>
+
+                    <div class="form-row">
+        <label for="node-input-rightsURI"><i class="icon-tag"></i>Rights URI: </label>
+        <input type="text" id="node-input-rightsURI" placeholder="Rights URI">
+        <br/><br/>
+</fieldset>
+
+
+<fieldset>
+    <legend>Train DataCite - Titles</legend>
+
+        <div class="form-row">
+        <label for="node-input-titleContent"><i class="icon-tag"></i>Title: </label>
+        <input type="text" id="node-input-titleContent" placeholder="Title">
+        <br/><br/>
+
+        <div class="form-row">
+            <label for="node-input-titleType"><i class="icon-tag"></i>Title Type: </label>
+            <select type="text" id="node-input-titleType">
+                <option value="ALTERNATIVETITLE">ALTERNATIVETITLE</option>
+                <option value="SUBTITLE">SUBTITLE</option>
+                <option value="TRANSLATEDTITLE">TRANSLATEDTITLE</option>
+                <option value="OTHER">OTHER</option>
+            </select>
+        </div>
+        <br/><br/>
+</fieldset>
+
+
+<fieldset>
+    <legend>Train DataCite - Descriptions</legend>
+
+            <div class="form-row">
+        <label for="node-input-descriptionContent"><i class="icon-tag"></i>Description: </label>
+        <input type="text" id="node-input-descriptionContent" placeholder="Description">
+        <br/><br/>
+
+        <div class="form-row">
+            <label for="node-input-descriptionType"><i class="icon-tag"></i>Description Type: </label>
+            <select type="text" id="node-input-descriptionType">
+                <option value="METHODS">METHODS</option>
+                <option value="SERIESINFORMATION">SERIESINFORMATION</option>
+                <option value="TABLEOFCONTENTS">TABLEOFCONTENTS</option>
+                <option value="TECHNICALINFO">TECHNICALINFO</option>
+                <option value="OTHER">OTHER</option>
+            </select>
+        </div>
+        <br/><br/>
+
+</fieldset>
+
+
+<fieldset>
+    <legend>Train DataCite - Contributors</legend>
+
+        <div class="form-row">
+        <label for="node-input-contributorName"><i class="icon-tag"></i>Name: </label>
+        <input type="text" id="node-input-contributorName" placeholder="Name">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-contributorAffiliation"><i class="icon-tag"></i>Affiliation: </label>
+        <input type="text" id="node-input-contributorAffiliation" placeholder="Affiliation">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-contributorGivenName"><i class="icon-tag"></i>Given Name: </label>
+        <input type="text" id="node-input-contributorGivenName" placeholder="Given Name">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-contributorFamilyName"><i class="icon-tag"></i>Family Name: </label>
+        <input type="text" id="node-input-contributorFamilyName" placeholder="Family Name">
+        <br/><br/>
+
+
+        <div class="form-row">
+            <label for="node-input-contributorType"><i class="icon-tag"></i>Type: </label>
+            <select type="text" id="node-input-contributorType">
+                <option value="CONTACTPERSON">CONTACTPERSON</option>
+                <option value="DATACOLLECTOR">DATACOLLECTOR</option>
+                <option value="DATACURATOR">DATACURATOR</option>
+                <option value="DATAMANAGER">DATAMANAGER</option>
+                <option value="DISTRIBUTOR">DISTRIBUTOR</option>
+                <option value="EDITOR">EDITOR</option>
+                <option value="HOSTINGINSTITUTION">HOSTINGINSTITUTION</option>
+                <option value="PRODUCER">PRODUCER</option>
+                <option value="PROJECTLEADER">PROJECTLEADER</option>
+                <option value="PROJECTMANAGER">PROJECTMANAGER</option>
+                <option value="PROJECTMEMBER">PROJECTMEMBER</option>
+                <option value="REGISTRATIONAGENCY">REGISTRATIONAGENCY</option>
+                <option value="REGISTRATIONAUTHORITY">REGISTRATIONAUTHORITY</option>
+                <option value="RESEARCHER">RESEARCHER</option>
+                <option value="RESEARCHGROUP">RESEARCHGROUP</option>
+                <option value="RIGHTSHOLDER">RIGHTSHOLDER</option>
+                <option value="SPONSOR">SPONSOR</option>
+                <option value="SUPERVISOR">SUPERVISOR</option>
+                <option value="WORKPACKAGELEADER">WORKPACKAGELEADER</option>
+                <option value="OTHER">OTHER</option>
+            </select>
+        </div>
+        <br/><br/>
+
+
+        <div class="form-row">
+        <label for="node-input-contributorNameIdentifierContent"><i class="icon-tag"></i>Name Identifier: </label>
+        <input type="text" id="node-input-contributorNameIdentifierContent" placeholder="Name Identifier">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-contributorNameIdentifierScheme"><i class="icon-tag"></i>Name Identifier Scheme: </label>
+        <input type="text" id="node-input-contributorNameIdentifierScheme" placeholder="Name Identifier Scheme">
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-contributorNameIdentifierSchemeURI"><i class="icon-tag"></i>Scheme URI: </label>
+        <input type="text" id="node-input-contributorNameIdentifierSchemeURI" placeholder="Scheme URI">
+        <br/><br/>
+
+</fieldset>
+
+
+<fieldset>
+    <legend>Train DataCite - FundingReferences</legend>
+
+            <div class="form-row">
+        <label for="node-input-funderName"><i class="icon-tag"></i>Name: </label>
+        <input type="text" id="node-input-funderName" placeholder="Name">
+        <br/><br/>
+
+                <div class="form-row">
+        <label for="node-input-awardNumber"><i class="icon-tag"></i>Award Number: </label>
+        <input type="text" id="node-input-awardNumber" placeholder="Award Number">
+        <br/><br/>
+
+                <div class="form-row">
+        <label for="node-input-awardTitle"><i class="icon-tag"></i>Award Title: </label>
+        <input type="text" id="node-input-awardTitle" placeholder="Award Title">
+        <br/><br/>
+
+          <div class="form-row">
+            <label for="node-input-funderIdentifierType"><i class="icon-tag"></i>Name Type: </label>
+            <select type="text" id="node-input-funderIdentifierType">
+                <option value="ISNI">ISNI</option>
+                <option value="GRID">GRID</option>
+                <option value="CROSSREF_FUNDER">CROSSREF_FUNDER</option>
+                <option value="OTHER">OTHER</option>
+            </select>
+        </div>
+        <br/><br/>
+
+        <div class="form-row">
+        <label for="node-input-fundingReferenceContent"><i class="icon-tag"></i>Funding Reference: </label>
+        <input type="text" id="node-input-fundingReferenceContent" placeholder="Funding Reference">
+        <br/><br/>
+
+</fieldset>
+<fieldset>
+    <legend>Train DataCite - ResourceType</legend>
+
+        <div class="form-row">
+        <label for="node-input-resourceTypeContent"><i class="icon-tag"></i>Resource: </label>
+        <input type="text" id="node-input-resourceTypeContent" placeholder="Resource">
+        <br/><br/>
+
+          <div class="form-row">
+            <label for="node-input-resourceTypeGeneral"><i class="icon-tag"></i>Resource Type: </label>
+            <select type="text" id="node-input-resourceTypeGeneral">
+                <option value="AUDIOVISUAL">AUDIOVISUAL</option>
+                <option value="COLLECTION">COLLECTION</option>
+                <option value="DATAPAPER">DATAPAPER</option>
+                <option value="DATASET">DATASET</option>
+                <option value="EVENT">EVENT</option>
+                <option value="IMAGE">IMAGE</option>
+                <option value="INTERACTIVERESOURCE">INTERACTIVERESOURCE</option>
+                <option value="MODEL">MODEL</option>
+                <option value="PHYSICALOBJECT">PHYSICALOBJECT</option>
+                <option value="SERVICE">SERVICE</option>
+                <option value="SOFTWARE">SOFTWARE</option>
+                <option value="SOUND">SOUND</option>
+                <option value="TEXT">TEXT</option>
+                <option value="WORKFLOW">WORKFLOW</option>
+                <option value="TRAIN">TRAIN</option>
+                <option value="OTHER">OTHER</option>
+            </select>
+        </div>
+        <br/><br/>
+
+</fieldset>
+
+
+</script>
+
+<script type="text/x-red" data-help-name="Train">
+    <p>PHT Train Metadata is defined for a common agreement and integration between different PHT implementations.
+
+Train metadata includes the attributes to define overall Analytic task/workflow to be executed. Its component; Wagon is used as a term to define the atomic algorithm that is a subcomponent of the workflow, to run independently on a specific station. Wagon metadata contains attributes about required station profile and resources. Resources metadata attributes defines target runtime environment and all the constituent physical files of analytic task such as docker image file, python code file, cql query file .
+
+In our PHT Implementation Train is implemented as a Json document and registered as a Digital Object on DataCite.  A custom Train Repository with required REST-Services is designed and being implemented.</p>
+</script>
+

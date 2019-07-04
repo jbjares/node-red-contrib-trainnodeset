@@ -1,0 +1,168 @@
+<script type="text/javascript">
+    RED.nodes.registerType('Resource',{
+        category: 'Train Modelling Nodes',
+        color: '#a6bbcf',
+        defaults: {
+
+            name: {value:"",require:true},
+            description: {value:"",require:true},
+            //OCI
+            created: {value:""},
+            author: {value:""},
+            architecture: {value:""},
+            os: {value:""},
+            user: {value:""},
+            port: {value:""},
+            protocol: {value:""},
+            env: {value:""},
+            entrypoint: {value:""},
+            cmd: {value:""},
+            volumes: {value:""},
+            numberOfArtifacts: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "../icons/resource.png",
+        label: function() {
+            return "Resource";
+        }
+    });
+</script>
+
+
+<script type="text/x-red" data-template-name="Resource">
+<fieldset>
+    <legend>Resource Core</legend>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i>Name: </label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <br/><br/>
+
+    <div class="form-row">
+        <label for="node-input-description"><i class="icon-tag"></i>Description:</label>
+        <input type="text" id="node-input-description" placeholder="Description">
+    </div>
+    <br/><br/>
+
+        <div class="form-row">
+            <label for="node-input-numberOfArtifacts"><i class="icon-tag"></i>Number Of Artifacts: </label>
+            <select type="text" id="node-input-numberOfArtifacts">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+            </select>
+        </div>
+</fieldset>
+
+
+
+<fieldset>
+    <legend>Resource - OCI</legend>
+     <br/><br/>
+     <div class="form-row">
+        <label for="node-input-created"><i class="icon-tag"></i>Created:</label>
+        <input type="text" id="node-input-created" placeholder="Created">
+    </div>
+
+     <br/><br/>
+     <div class="form-row">
+        <label for="node-input-author"><i class="icon-tag"></i> Author:</label>
+        <input type="text" id="node-input-author" placeholder=" Author">
+    </div>
+
+     <br/><br/>
+     <div class="form-row">
+        <label for="node-input-cmd"><i class="icon-tag"></i>Command:</label>
+        <input type="text" id="node-input-cmd" placeholder="Command">
+    </div>
+
+     <br/><br/>
+     <div class="form-row">
+        <label for="node-input-entrypoint"><i class="icon-tag"></i>Entrypoint:</label>
+        <input type="text" id="node-input-entrypoint" placeholder="Entrypoint">
+    </div>
+
+     <br/><br/>
+     <div class="form-row">
+        <label for="node-input-env"><i class="icon-tag"></i>Env:</label>
+        <input type="text" id="node-input-env" placeholder="OCI Config Env List">
+    </div>
+
+     <br/><br/>
+     <div class="form-row">
+        <label for="node-input-port"><i class="icon-tag"></i>Port:</label>
+        <input type="text" id="node-input-port" placeholder="Port">
+    </div>
+
+         <br/><br/>
+     <div class="form-row">
+        <label for="node-input-protocol"><i class="icon-tag"></i>Protocol:</label>
+        <input type="text" id="node-input-protocol" placeholder="Port">
+    </div>
+
+     <br/><br/>
+     <div class="form-row">
+        <label for="node-input-volumes"><i class="icon-tag"></i>Volumes:</label>
+        <input type="text" id="node-input-volumes" placeholder="Volumes">
+    </div>
+
+     <br/><br/>
+     <div class="form-row">
+        <label for="node-input-user"><i class="icon-tag"></i>User:</label>
+        <input type="text" id="node-input-user" placeholder="User">
+    </div>
+
+        <br/><br/>
+        <div class="form-row">
+            <label for="node-input-architecture"><i class="icon-tag"></i>Architecture: </label>
+            <select type="text" id="node-input-architecture">
+                <option value="ARM">ARM</option>
+                <option value="ARM64">ARM64</option>
+                <option value="ARM64">ARM64</option>
+                <option value="PPC64LE">PPC64LE</option>
+
+                <option value="MIPS">MIPS</option>
+                <option value="MIPSLE">MIPSLE</option>
+                <option value="MIPS64">MIPS64</option>
+                <option value="MIPS64LE">MIPS64LE</option>
+
+                <option value="S390X">S390X</option>
+                <option value="AMD64">AMD64</option>
+                <option value="386">386</option>
+            </select>
+        </div>
+                <br/><br/>
+        <div class="form-row">
+            <label for="node-input-os"><i class="icon-tag"></i>OS: </label>
+            <select type="text" id="node-input-os">
+            <option value="ANDROID">ANDROID</option>
+                <option value="DARWIN">DARWIN</option>
+                <option value="DRAGONFLY">DRAGONFLY</option>
+                <option value="FREEBSD">FREEBSD</option>
+
+                <option value="LINUX">LINUX</option>
+                <option value="NETBSD">NETBSD</option>
+                <option value="OPENBSD">OPENBSD</option>
+                <option value="PLAN9">PLAN9</option>
+
+                <option value="SOLARIS">SOLARIS</option>
+                <option value="WINDOWS">WINDOWS</option>
+            </select>
+        </div>
+
+
+
+</script>
+
+    <script type="text/x-red" data-help-name="Resource">
+    <p>PHT Train Metadata is defined for a common agreement and integration between different PHT implementations.
+
+Train metadata includes the attributes to define overall Analytic task/workflow to be executed. Its component; Wagon is used as a term to define the atomic algorithm that is a subcomponent of the workflow, to run independently on a specific station. Wagon metadata contains attributes about required station profile and resources. Resources metadata attributes defines target runtime environment and all the constituent physical files of analytic task such as docker image file, python code file, cql query file .
+
+In our PHT Implementation Train is implemented as a Json document and registered as a Digital Object on DataCite.  A custom Train Repository with required REST-Services is designed and being implemented.</p>
+</script>
