@@ -134,19 +134,19 @@ module.exports = function(RED) {
         });
 
         function getInternalId(){
-            var res = request('GET', 'http://138.68.108.115/trainDORepository/train/InternalId');
+            var res = request('GET', 'http://menzel.informatik.rwth-aachen.de/trainDORepository/train/InternalId');
             var internalId = res.getBody('utf8');
             return internalId
         }
 
         function getInternalPointer(){
-            var res = request('GET', 'http://138.68.108.115/trainDORepository/train/InternalPointer');
+            var res = request('GET', 'http://menzel.informatik.rwth-aachen.de/trainDORepository/train/InternalPointer');
             var internalPointer = res.getBody('utf8');
             return internalPointer
         }
 
         function getInternalVersion(){
-            var res = request('GET', 'http://138.68.108.115/trainDORepository/train/InternalVersion');
+            var res = request('GET', 'http://menzel.informatik.rwth-aachen.de/trainDORepository/train/InternalVersion');
             var internalVersion = res.getBody('utf8');
             return internalVersion
         }
