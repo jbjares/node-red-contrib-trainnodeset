@@ -2,31 +2,25 @@ module.exports = function(RED) {
     console.log("Starting Wagon Node");
     'use strict';
 
-    var message = require('../lib/Message.js');
+    var wagons = require('../lib/wagons.js');
 
 
     function WagonNode(config) {
         RED.nodes.createNode(this,config);
         var node = this;
-        var wagons = [];
-        var wagon = new Object();
-        wagon.name = config.name;
-        wagon.description = config.description;
-        wagon.stationProfiles = [];
-        this.stationProfile1 = config.stationProfile1;
-        this.stationProfile2 = config.stationProfile2;
-        this.stationProfile3 = config.stationProfile3;
-        //console.log("Wagon  message: "+JSON.stringify(wagon));
+        wagons = new Object();
+        wagons.wagon = [];
+        wagons.wagon[0].name = config.name;
+        wagons.wagon[0].description = config.description;
+        wagons.wagon[0].stationProfiles = new Object();
+        wagons.wagon[0].stationProfiles.stationProfile = [];
+        wagons.wagon[0].stationProfiles.stationProfile[0] = config.stationProfile1;
+        wagons.wagon[0].stationProfiles.stationProfile[1] = config.stationProfile2;
+        wagons.wagon[0].stationProfiles.stationProfile[2] = config.stationProfile3;
 
 
         this.on('input', function(msg) {
-
-            wagon.stationProfiles.push(this.stationProfile1);
-            wagon.stationProfiles.push(this.stationProfile2);
-            wagon.stationProfiles.push(this.stationProfile3);
-            wagons.push(wagon);
-            msg.message.train.wagons = wagons;
-            //console.log("msg.message.train: "+JSON.stringify(msg.message.train));
+            msg.train.wagons = wagons;
 
             node.send(msg);
         });

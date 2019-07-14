@@ -1,6 +1,7 @@
 module.exports = function(RED) {
 
-    var message = require('../lib/Message.js');
+    var train = require('../lib/train.js');
+    var datacite = require('../lib/datacite.js');
     var request = require('sync-request');
 
     function TrainNode(config) {
@@ -10,143 +11,142 @@ module.exports = function(RED) {
 
 
         // Train Core
-        message = new Object();
-        message.train = new Object();
-        message.train.name = config.name;
-        message.train.description = config.description;
-        message.train.sourceRepository = config.sourceRepository;
-        message.train.userToken = config.userToken;
-        message.train.internalId = getInternalId();
-        message.train.internalVersion = getInternalVersion();
-        message.train.internalPointer = getInternalPointer();
+        train.name = config.name;
+        train.description = config.description;
+        train.sourceRepository = config.sourceRepository;
+        train.userToken = config.userToken;
+        train.internalId = getInternalId();
+        train.internalVersion = getInternalVersion();
+        train.internalPointer = getInternalPointer();
+        train.wagons = new Object();
+        train.wagons.wagon = [];
 
         //Train DataCite Core
-        message.train.datacite = new Object();
-        message.train.language = config.language;
-        message.train.version = config.version;
-        message.train.publicationYear = config.publicationYear;
-        message.train.publisher = config.publisher;
+        datacite.language = config.language;
+        datacite.version = config.version;
+        datacite.publicationYear = config.publicationYear;
+        datacite.publisher = config.publisher;
 
 
         //Train DataCite - Identifier
-        message.train.datacite.identifier = new Object();
-        message.train.datacite.identifier.identifierType = config.identifierType;
-        message.train.datacite.identifier.content = config.identifierContent;
+        datacite.identifier = new Object();
+        datacite.identifier.identifierType = config.identifierType;
+        datacite.identifier.content = config.identifierContent;
 
         //Train DataCite - Creators
-        message.train.datacite.creators = [];
-        message.train.datacite.creators.creator = new Object();
-        message.train.datacite.creators.creator.affiliation = config.creatorAffiliation;
-        message.train.datacite.creators.creator.givenName = config.creatorGivenName;
-        message.train.datacite.creators.creator.familyName = config.creatorFamilyName;
-        message.train.datacite.creators.creator.creatorName = new Object();
-        message.train.datacite.creators.creator.creatorName.nameType = config.nameType;
-        message.train.datacite.creators.creator.creatorName.content = config.creatorContent;
-        message.train.datacite.creators.creator.nameIdentifier = new Object();
-        message.train.datacite.creators.creator.nameIdentifier.nameIdentifierScheme = config.creatorNameIdentifierScheme;
-        message.train.datacite.creators.creator.nameIdentifier.schemeURI = config.creatorSchemeURI;
-        message.train.datacite.creators.creator.nameIdentifier.content = config.nameIdentifierContent;
+        datacite.creators = [];
+        datacite.creators.creator = new Object();
+        datacite.creators.creator.affiliation = config.creatorAffiliation;
+        datacite.creators.creator.givenName = config.creatorGivenName;
+        datacite.creators.creator.familyName = config.creatorFamilyName;
+        datacite.creators.creator.creatorName = new Object();
+        datacite.creators.creator.creatorName.nameType = config.nameType;
+        datacite.creators.creator.creatorName.content = config.creatorContent;
+        datacite.creators.creator.nameIdentifier = new Object();
+        datacite.creators.creator.nameIdentifier.nameIdentifierScheme = config.creatorNameIdentifierScheme;
+        datacite.creators.creator.nameIdentifier.schemeURI = config.creatorSchemeURI;
+        datacite.creators.creator.nameIdentifier.content = config.nameIdentifierContent;
 
         //Train DataCite - Subjects
-        message.train.datacite.subjects = [];
-        message.train.datacite.subjects.subject = new Object();
-        message.train.datacite.subjects.subject.schemeURI = config.subjectSchemeURI;
-        message.train.datacite.subjects.subject.content = config.subjectContent;
-        message.train.datacite.subjects.subject.subjectScheme = config.subjectScheme;
+        datacite.subjects = [];
+        datacite.subjects.subject = new Object();
+        datacite.subjects.subject.schemeURI = config.subjectSchemeURI;
+        datacite.subjects.subject.content = config.subjectContent;
+        datacite.subjects.subject.subjectScheme = config.subjectScheme;
 
         //Train DataCite - Dates
-        message.train.datacite.dates = [];
-        message.train.datacite.dates.date = new Object();
-        message.train.datacite.dates.date.dateType = config.dateType;
-        message.train.datacite.dates.date.dateInformation = config.dateInformation;
-        message.train.datacite.dates.date.content = config.dateContent;
+        datacite.dates = [];
+        datacite.dates.date = new Object();
+        datacite.dates.date.dateType = config.dateType;
+        datacite.dates.date.dateInformation = config.dateInformation;
+        datacite.dates.date.content = config.dateContent;
 
         //Train DataCite - Formats
-        message.train.datacite.formats = [];
-        message.train.datacite.formats.format = new Object();
-        message.train.datacite.formats.format.content = config.format;
+        datacite.formats = [];
+        datacite.formats.format = new Object();
+        datacite.formats.format.content = config.format;
 
         //Train DataCite - RightsList
-        message.train.datacite.rightsList = [];
-        message.train.datacite.rightsList.rights = new Object();
-        message.train.datacite.rightsList.rights.rightsURI = config.rightsURI;
-        message.train.datacite.rightsList.rights.content = config.rightsContent;
+        datacite.rightsList = [];
+        datacite.rightsList.rights = new Object();
+        datacite.rightsList.rights.rightsURI = config.rightsURI;
+        datacite.rightsList.rights.content = config.rightsContent;
 
         //Train DataCite - Titles
-        message.train.datacite.titles = [];
-        message.train.datacite.titles.title = new Object();
-        message.train.datacite.titles.title.content = config.titleContent;
-        message.train.datacite.titles.title.titleType = config.titleType;
+        datacite.titles = [];
+        datacite.titles.title = new Object();
+        datacite.titles.title.content = config.titleContent;
+        datacite.titles.title.titleType = config.titleType;
 
         //Train DataCite - Descriptions
-        message.train.datacite.descriptions = [];
-        message.train.datacite.descriptions.description = new Object();
-        message.train.datacite.descriptions.description.descriptionType = config.descriptionType;
-        message.train.datacite.descriptions.description.content = config.descriptionContent;
+        datacite.descriptions = [];
+        datacite.descriptions.description = new Object();
+        datacite.descriptions.description.descriptionType = config.descriptionType;
+        datacite.descriptions.description.content = config.descriptionContent;
 
         //Train DataCite - Contributors
-        message.train.datacite.contributors = [];
-        message.train.datacite.contributors.contributor = new Object();
-        message.train.datacite.contributors.contributor.affiliation = config.contributorAffiliation;
-        message.train.datacite.contributors.contributor.givenName = config.contributorGivenName;
-        message.train.datacite.contributors.contributor.familyName = config.contributorFamilyName;
-        message.train.datacite.contributors.contributor.contributorType = config.contributorType;
-        message.train.datacite.contributors.contributor.contributorName = config.contributorName;
-        message.train.datacite.contributors.contributor.nameIdentifier = new Object();
-        message.train.datacite.contributors.contributor.nameIdentifier.nameIdentifierScheme = config.contributorNameIdentifierScheme;
-        message.train.datacite.contributors.contributor.nameIdentifier.schemeURI = config.contributorNameIdentifierSchemeURI;
-        message.train.datacite.contributors.contributor.nameIdentifier.content = config.contributorNameIdentifierContent;
+        datacite.contributors = [];
+        datacite.contributors.contributor = new Object();
+        datacite.contributors.contributor.affiliation = config.contributorAffiliation;
+        datacite.contributors.contributor.givenName = config.contributorGivenName;
+        datacite.contributors.contributor.familyName = config.contributorFamilyName;
+        datacite.contributors.contributor.contributorType = config.contributorType;
+        datacite.contributors.contributor.contributorName = config.contributorName;
+        datacite.contributors.contributor.nameIdentifier = new Object();
+        datacite.contributors.contributor.nameIdentifier.nameIdentifierScheme = config.contributorNameIdentifierScheme;
+        datacite.contributors.contributor.nameIdentifier.schemeURI = config.contributorNameIdentifierSchemeURI;
+        datacite.contributors.contributor.nameIdentifier.content = config.contributorNameIdentifierContent;
 
         //Train DataCite - FundingReferences
-        message.train.datacite.fundingReferences = [];
-        message.train.datacite.fundingReferences.fundingReference = new Object();
-        message.train.datacite.fundingReferences.fundingReference.funderName = config.funderName;
-        message.train.datacite.fundingReferences.fundingReference.awardNumber = config.awardNumber;
-        message.train.datacite.fundingReferences.fundingReference.awardTitle = config.awardTitle;
-        message.train.datacite.fundingReferences.fundingReference.funderIdentifier = new Object();
-        message.train.datacite.fundingReferences.fundingReference.funderIdentifier.funderIdentifierType = config.funderIdentifierType;
-        message.train.datacite.fundingReferences.fundingReference.funderIdentifier.content = config.fundingReferenceContent;
+        datacite.fundingReferences = [];
+        datacite.fundingReferences.fundingReference = new Object();
+        datacite.fundingReferences.fundingReference.funderName = config.funderName;
+        datacite.fundingReferences.fundingReference.awardNumber = config.awardNumber;
+        datacite.fundingReferences.fundingReference.awardTitle = config.awardTitle;
+        datacite.fundingReferences.fundingReference.funderIdentifier = new Object();
+        datacite.fundingReferences.fundingReference.funderIdentifier.funderIdentifierType = config.funderIdentifierType;
+        datacite.fundingReferences.fundingReference.funderIdentifier.content = config.fundingReferenceContent;
 
         //Train DataCite - ResourceType
-        message.train.datacite.resourceType = new Object();
-        message.train.datacite.resourceType.resourceTypeGeneral = config.resourceTypeGeneral;
-        message.train.datacite.resourceType.content = config.resourceTypeContent;
+        datacite.resourceType = new Object();
+        datacite.resourceType.resourceTypeGeneral = config.resourceTypeGeneral;
+        datacite.resourceType.content = config.resourceTypeContent;
 
 
-
-        //console.log("creators after new Object: "+JSON.stringify(message.datacite.creators.creator));
-        //console.log("datacite after new Object: "+JSON.stringify(message.datacite));
-        //console.log("message=> "+JSON.stringify(message));
 
         this.on('input', function(msg) {
-            message.train.datacite.creators.push(message.train.datacite.creators.creator);
-            message.train.datacite.subjects.push(message.train.datacite.subjects.subject);
-            message.train.datacite.dates.push(message.train.datacite.dates.date);
-            message.train.datacite.formats.push(message.train.datacite.formats.format);
-            message.train.datacite.rightsList.push(message.train.datacite.rightsList.rights);
-            message.train.datacite.titles.push(message.train.datacite.titles.title);
-            message.train.datacite.descriptions.push(message.train.datacite.descriptions.description);
-            message.train.datacite.contributors.push(message.train.datacite.contributors.contributor);
-            message.train.datacite.fundingReferences.push(message.train.datacite.fundingReferences.fundingReference);
 
-            msg.message = message;
+            datacite.creators.push(datacite.creators.creator);
+            datacite.subjects.push(datacite.subjects.subject);
+            datacite.dates.push(datacite.dates.date);
+            datacite.formats.push(datacite.formats.format);
+            datacite.rightsList.push(datacite.rightsList.rights);
+            datacite.titles.push(datacite.titles.title);
+            datacite.descriptions.push(datacite.descriptions.description);
+            datacite.contributors.push(datacite.contributors.contributor);
+            datacite.fundingReferences.push(datacite.fundingReferences.fundingReference);
+
+            train.datacite = datacite;
+            train.wagons = train.wagons;
+            msg.train = train;
+
             node.send(msg);
         });
 
         function getInternalId(){
-            var res = request('GET', 'http://menzel.informatik.rwth-aachen.de/trainDORepository/train/InternalId');
+            var res = request('GET', 'http://0.0.0.0/RepositoryService/train/InternalId');
             var internalId = res.getBody('utf8');
             return internalId
         }
 
         function getInternalPointer(){
-            var res = request('GET', 'http://menzel.informatik.rwth-aachen.de/trainDORepository/train/InternalPointer');
+            var res = request('GET', 'http://0.0.0.0/RepositoryService/train/InternalPointer');
             var internalPointer = res.getBody('utf8');
             return internalPointer
         }
 
         function getInternalVersion(){
-            var res = request('GET', 'http://menzel.informatik.rwth-aachen.de/trainDORepository/train/InternalVersion');
+            var res = request('GET', 'http://0.0.0.0/RepositoryService/train/InternalVersion');
             var internalVersion = res.getBody('utf8');
             return internalVersion
         }

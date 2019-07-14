@@ -1,60 +1,45 @@
 module.exports = function(RED) {
 
     'use strict';
-    var message = require('../lib/Message.js');
+    var resources = require('../lib/resources.js');
+    var oci = require('../lib/oci.js');
 
     function ResourceNode(config) {
         console.log("Starting Resource Node");
         RED.nodes.createNode(this,config);
         var node = this;
 
-        var resources = [];
-        var resource = new Object();
-        resource.name = config.name;
-        resource.description = config.description;
+        resources = new Object();
+        resources.resource = new Object();
+        resources.resource.name = config.name;
+        resources.resource.description = config.description;
+
         //OCI
-        var oci = new Object();
-        oci.created = config.created;
-        oci.author = config.author;
-        oci.architecture = config.architecture;
-        oci.os = config.os;
-        oci.config  = new Object();
-        oci.user = config.user;
-        var exposedPorts = [];
-        this.port = config.port;
-        this.protocol = config.protocol;
-        var env = [];
-        var entrypoint = [];
-        var cmd = [];
-        var volumes = [];
-        this.env = config.env;
-        this.entrypoint = config.entrypoint;
-        this.cmd = config.cmd;
-        this.volumes = config.volumes;
-        this.numberOfArtifacts = config.numberOfArtifacts;
-        var count = 0;
+        resources.resource.oci = new Object();
+        resources.resource.oci.created = config.created;
+        resources.resource.oci.author = config.author;
+        resources.resource.oci.architecture = config.architecture;
+        resources.resource.oci.os = config.os;
+        resources.resource.oci.config  = new Object();
+        resources.resource.oci.config.user = config.user;
+        resources.resource.oci.config.exposedPorts = [{port:"",protocol:""}];
+        resources.resource.oci.config.exposedPorts[0].port = config.port;
+        resources.resource.oci.config.exposedPorts[0].protocol = config.protocol;
+        resources.resource.oci.env = config.env;
+        resources.resource.oci.entrypoint = config.entrypoint;
+        resources.resource.oci.cmd = config.cmd;
+        resources.resource.oci.volumes = config.volumes;
+        //resources.resources.resource.oci.numberOfArtifacts = config.numberOfArtifacts;
+        //var count = 0;
 
         this.on('input', function(msg) {
-            volumes.push(this.volumes)
-            cmd.push(this.cmd);
-            entrypoint.push(this.entrypoint);
-            env.push(this.env)
-            exposedPorts.push(this.port,this.protocol);
-            resource.oci = oci;
-            resources.push(resource);
-            //msg.message.resources = resources;
 
-            // console.log("msg: "+JSON.stringify(msg));
-            // console.log("msg.message: "+JSON.stringify(msg.message));
-            // console.log("msg.message.train: "+JSON.stringify(msg.message.train));
-            //console.log("msg.message.train.wagons: "+JSON.stringify(msg.message.train.wagons[0]));
-            // console.log("msg.message.train.wagons.resources: "+JSON.stringify(msg.message.train.wagons.resources));
-
-            //count++;
-            //console.log("resources count: "+count);
-            msg.numberOfArtifacts = this.numberOfArtifacts;
-            msg.message.train.wagons[0].resources = resources;
-            //console.log("msg: "+JSON.stringify(msg));
+            // resources.push(resource);
+            // msg.numberOfArtifacts = this.numberOfArtifacts;
+            console.log("msg.train.wagons: "+JSON.stringify(msg.train.wagons));
+            console.log("resources "+JSON.stringify(resources));
+            msg.train.wagons.wagon.resources = resources;
+            console.log("msg.train.wagons.wagon.resources "+JSON.stringify(msg.train.wagons.wagon.resources));
             node.send(msg);
         });
     }

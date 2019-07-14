@@ -5,11 +5,10 @@
             "train": "nodes/core/train/train.js",
             "wagon": "nodes/core/wagon/wagon.js",
             "resource": "nodes/core/resource/resource.js",
-            "artifact": "nodes/core/artifact/artifact.js",
-            "result": "nodes/core/result/result.js"
+            "artifact": "nodes/core/artifact/artifact.js"
         }
     },
-    "version": "0.0.2",
+    "version": "0.0.1",
     "traindescription": "The nodes train, wagon, resources and Artifacts, to compose a Smart Train @ menzel.informatik.rwth-aachen.de",
     "dependencies": {
         "ajv": "6.10.0",

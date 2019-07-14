@@ -1,23 +1,26 @@
 var fs = require('fs');
-
+var request = require('sync-request');
 module.exports = function (RED) {
 
     'use strict';
-    var message = require('../lib/Message.js');
-
+    var artifacts = require('../lib/artifacts.js');
+    var artifact = [];
+    var count = 0;
     function ArtifactNode(config) {
         RED.nodes.createNode(this, config);
         var node = this;
-        var artifacts = [];
-        var artifact = new Object();
-        artifact.name = config.name;
-        artifact.filename = config.filename;
-        artifact.format = config.format;
-        artifact.filedata = config.filedata;
+        artifacts = new Object();
+        artifacts.artifact = artifact;
+        artifacts.artifact[count] = [{name:config.name,filename:config.filename,format:config.format,filedata:config.filedata}];
 
 
+        // console.log(" starting artifacts  =================> "+JSON.stringify(artifacts));
+        // console.log(" starting artifact  =================> "+JSON.stringify(artifacts.artifact));
 
         this.on('input', function (msg) {
+
+
+
             var index = config.filedata.indexOf(';base64,');
             if (index === -1) {
                 node.error('File format error', msg);
@@ -30,48 +33,31 @@ module.exports = function (RED) {
                     msg.payload = buf;
                 }
 
-                // artifacts.push(artifact);
-                // msg.artifacts = this.artifacts;
-                // msg.message.train.wagons[0].resources[0].artifacts = artifacts;
 
-                //artifacts.push(artifact);
-                msg.artifacts = this.artifacts;
-                msg.message.train.wagons[0].resources[0].artifacts = artifacts;
-                msg.message.train.wagons[0].resources[0].artifacts.push(artifact);
-                console.log("artifact artfacts ===================>>> "+JSON.stringify(msg.message.train.wagons[0].resources[0].artifacts));
-                console.log("artifact ===================>>> "+JSON.stringify(artifact));
-                // console.log("node ===================>>> "+JSON.stringify(node));
-                // console.log("node ===================>>> "+JSON.stringify(config));
+                artifacts.artifact = artifact;
+                msg.train.wagons.wagon.resources.resource.artifacts = artifacts;
+
+// console.log("=========== msg.train.wagons.wagon.resources.resource.artifacts ==========="+
+//     JSON.stringify("artifact: "+JSON.stringify(artifact)));
+
+                var res = request('PUT', 'http://0.0.0.0/RepositoryService/train/add/artifacts', {
+                    json: msg.train,
+                });
+                var updatedTrain = JSON.parse(res.getBody('utf8'));
+                msg.train = updatedTrain;
+
 
                 node.send(msg);
             }
         });
+        this.on('close', function() {
+            artifacts = new Object();
+            artifact = [];
+            count = 0;
+        });
 
-        // this.on('close', function(msg) {
-        //     console.log("msg.count =====================================> "+count);
-        //     console.log("node =====================================> "+JSON.stringify(node));
-        //     console.log("msg.message.train.wagons[0].resources[0].artifacts = [] =====================================> "+msg.message.train.wagons[0].resources[0].artifacts);
-        //     // msg.message.train.wagons[0].resources[0].artifacts = []
-        //     // node.send(msg,msg.artifact,msg.count);
-        // });
 
-        // this.on('close', function(removed, done, msg) {
-        //     if (removed) {
-        //         console.log("This node has been deleted");
-        //     } else {
-        //         console.log("This node is being restarted");
-        //     }
-        //     console.log("done");
-        //     done(msg);
-        // });
-        //
-        // function done(msg){
-        //     console.log("msg.count =====================================> "+count);
-        //     console.log("node =====================================> "+JSON.stringify(node));
-        //     console.log("msg.message.train.wagons[0].resources[0].artifacts = [] =====================================> "+msg.message.train.wagons[0].resources[0].artifacts);
-        //     // msg.message.train.wagons[0].resources[0].artifacts = []
-        //     // node.send(msg,msg.artifact,msg.count);
-        // }
+
     }
     RED.nodes.registerType("Artifact", ArtifactNode);
 };
