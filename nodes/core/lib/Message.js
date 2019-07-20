@@ -187,14 +187,10 @@ Message = {
 
                         },
                     ],
-                stationProfiles: {
-                    stationProfile:[
-                        {
-                            content:[],
-                        }
-                    ]
+                stationProfiles:{
+                    stationProfile:[]
                 },
-            }
+            },
             ],
         similarProjects:[],
         flow:{

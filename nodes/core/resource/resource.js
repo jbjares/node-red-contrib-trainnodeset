@@ -35,27 +35,23 @@ module.exports = function(RED) {
         var count = 0;
 
         this.on('input', function(msg) {
-            volumes.push(this.volumes)
-            cmd.push(this.cmd);
-            entrypoint.push(this.entrypoint);
-            env.push(this.env)
-            exposedPorts.push(this.port,this.protocol);
-            resource.oci = oci;
-            resources.push(resource);
-            //msg.message.resources = resources;
 
-            // console.log("msg: "+JSON.stringify(msg));
-            // console.log("msg.message: "+JSON.stringify(msg.message));
-            // console.log("msg.message.train: "+JSON.stringify(msg.message.train));
-            //console.log("msg.message.train.wagons: "+JSON.stringify(msg.message.train.wagons[0]));
-            // console.log("msg.message.train.wagons.resources: "+JSON.stringify(msg.message.train.wagons.resources));
 
-            //count++;
-            //console.log("resources count: "+count);
-            msg.numberOfArtifacts = this.numberOfArtifacts;
-            msg.message.train.wagons[0].resources = resources;
-            //console.log("msg: "+JSON.stringify(msg));
-            node.send(msg);
+
+
+
+
+            // volumes.push(this.volumes)
+            // cmd.push(this.cmd);
+            // entrypoint.push(this.entrypoint);
+            // env.push(this.env)
+            // exposedPorts.push(this.port,this.protocol);
+            // resource.oci = oci;
+            // resources.push(resource);
+
+            // msg.numberOfArtifacts = this.numberOfArtifacts;
+            // msg.message.train.wagons[0].resources = resources;
+            // node.send(msg);
         });
     }
     RED.nodes.registerType("Resource",ResourceNode);
