@@ -36,7 +36,7 @@
         "raw-body": "2.4.0",
         "request": "2.88.0",
         "sync-request": "6.1.0",
-        "ws": "6.2.1",
+        "ws": "7.4.6",
         "xml2js": "0.4.19"
     },
     "keywords": [
